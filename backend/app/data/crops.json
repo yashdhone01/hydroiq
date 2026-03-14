@@ -1,0 +1,108 @@
+{
+  "crops": [
+    {
+      "id": "basil",
+      "name": "Basil",
+      "systems": ["NFT", "DWC", "Kratky"],
+      "growth_days": 28,
+      "yield_per_sqft_kg": 0.45,
+      "local_price_per_kg": 150,
+      "export_price_per_kg": 800,
+      "export_markets": ["EU", "UAE", "UK"],
+      "water_liters_per_sqft": 2.5,
+      "difficulty": "Easy",
+      "cycles_per_year": 13
+    },
+    {
+      "id": "lettuce",
+      "name": "Lettuce",
+      "systems": ["NFT", "DWC"],
+      "growth_days": 35,
+      "yield_per_sqft_kg": 0.6,
+      "local_price_per_kg": 80,
+      "export_price_per_kg": 350,
+      "export_markets": ["UAE", "Singapore"],
+      "water_liters_per_sqft": 3.0,
+      "difficulty": "Easy",
+      "cycles_per_year": 10
+    },
+    {
+      "id": "spinach",
+      "name": "Spinach",
+      "systems": ["NFT", "DWC", "Kratky"],
+      "growth_days": 40,
+      "yield_per_sqft_kg": 0.5,
+      "local_price_per_kg": 60,
+      "export_price_per_kg": 280,
+      "export_markets": ["UAE", "UK"],
+      "water_liters_per_sqft": 2.8,
+      "difficulty": "Easy",
+      "cycles_per_year": 9
+    },
+    {
+      "id": "cherry_tomato",
+      "name": "Cherry Tomato",
+      "systems": ["DWC", "NFT"],
+      "growth_days": 75,
+      "yield_per_sqft_kg": 1.2,
+      "local_price_per_kg": 120,
+      "export_price_per_kg": 600,
+      "export_markets": ["UAE", "UK", "EU"],
+      "water_liters_per_sqft": 4.5,
+      "difficulty": "Medium",
+      "cycles_per_year": 4
+    },
+    {
+      "id": "mint",
+      "name": "Mint",
+      "systems": ["NFT", "DWC", "Kratky"],
+      "growth_days": 30,
+      "yield_per_sqft_kg": 0.4,
+      "local_price_per_kg": 200,
+      "export_price_per_kg": 900,
+      "export_markets": ["EU", "UAE", "UK", "USA"],
+      "water_liters_per_sqft": 2.2,
+      "difficulty": "Easy",
+      "cycles_per_year": 12
+    },
+    {
+      "id": "cucumber",
+      "name": "Cucumber",
+      "systems": ["DWC", "NFT"],
+      "growth_days": 55,
+      "yield_per_sqft_kg": 1.5,
+      "local_price_per_kg": 40,
+      "export_price_per_kg": 180,
+      "export_markets": ["UAE", "Singapore"],
+      "water_liters_per_sqft": 5.0,
+      "difficulty": "Medium",
+      "cycles_per_year": 6
+    },
+    {
+      "id": "kale",
+      "name": "Kale",
+      "systems": ["NFT", "DWC"],
+      "growth_days": 50,
+      "yield_per_sqft_kg": 0.55,
+      "local_price_per_kg": 180,
+      "export_price_per_kg": 750,
+      "export_markets": ["EU", "UK", "USA"],
+      "water_liters_per_sqft": 3.2,
+      "difficulty": "Easy",
+      "cycles_per_year": 7
+    },
+    {
+      "id": "strawberry",
+      "name": "Strawberry",
+      "systems": ["NFT", "DWC"],
+      "growth_days": 90,
+      "yield_per_sqft_kg": 0.8,
+      "local_price_per_kg": 300,
+      "export_price_per_kg": 1200,
+      "export_markets": ["UAE", "UK", "EU"],
+      "water_liters_per_sqft": 3.8,
+      "difficulty": "Hard",
+      "cycles_per_year": 3
+    }
+  ]
+}
