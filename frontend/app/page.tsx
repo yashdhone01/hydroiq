@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import axios from 'axios'
 
-const API = 'http://localhost:8000'
+const API = 'https://hydroiq.onrender.com'
 
 export default function Home() {
   const [form, setForm] = useState({
