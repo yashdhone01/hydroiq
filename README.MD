@@ -5,6 +5,8 @@
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 
+**Live:** [hydroiq.vercel.app](https://hydroiq.vercel.app) · **API:** [hydroiq.onrender.com/docs](https://hydroiq.onrender.com/docs)
+
 Full stack crop intelligence platform for hydroponic growers. Input your setup, get ranked crop recommendations with yield estimates, ROI projections, and export market intelligence.
 
 Built this because hydroponic growers — especially those targeting export markets — make critical crop selection decisions based on intuition. HydroIQ gives them data.
