@@ -84,13 +84,13 @@ def calculate_roi(
     breakeven_months        = (setup_cost / (annual_profit / 12)) if annual_profit > 0 else None
 
     return {
-        'crop_name':                crop['name'],
-        'annual_revenue':           round(annual_revenue, 2),
-        'annual_operating_cost':    round(annual_operating_cost, 2),
-        'annual_profit':            round(annual_profit, 2),
-        'setup_cost':               round(setup_cost, 2),
-        'breakeven_months':         round(breakeven_months, 1) if breakeven_months else 'N/A',
-        'roi_percentage':           round((annual_profit / setup_cost) * 100, 1) if setup_cost > 0 else 0,
-        'price_per_kg':             price,
-        'target_market':            target_market
-    }
+    'crop_name':                str(crop['name']),
+    'annual_revenue':           round(float(annual_revenue), 2),
+    'annual_operating_cost':    round(float(annual_operating_cost), 2),
+    'annual_profit':            round(float(annual_profit), 2),
+    'setup_cost':               round(float(setup_cost), 2),
+    'breakeven_months':         round(float(breakeven_months), 1) if breakeven_months else 'N/A',
+    'roi_percentage':           round(float((annual_profit / setup_cost) * 100), 1) if setup_cost > 0 else 0,
+    'price_per_kg':             int(price),
+    'target_market':            target_market
+ }
