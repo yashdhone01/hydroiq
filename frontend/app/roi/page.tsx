@@ -4,7 +4,7 @@ import axios from 'axios'
 import Link from 'next/link'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 
-const API = 'http://localhost:8000'
+const API = 'https://hydroiq.onrender.com'
 
 export default function ROIPage() {
   const [form, setForm] = useState({

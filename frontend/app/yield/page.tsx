@@ -3,7 +3,7 @@ import { useState } from 'react'
 import axios from 'axios'
 import Link from 'next/link'
 
-const API = 'http://localhost:8000'
+const API = 'https://hydroiq.onrender.com'
 
 export default function YieldPage() {
   const [form, setForm] = useState({
