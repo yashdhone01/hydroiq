@@ -21,6 +21,13 @@ app.state.live_prices = {}
 
 @app.on_event("startup")
 async def startup_event():
+    import os
+    model_path = os.path.join('app', 'models', 'saved', 'yield_model.pkl')
+    if not os.path.exists(model_path):
+        print("Training yield model...")
+        from app.models.train_yield_model import train_yield_model
+        train_yield_model()
+
     print("Fetching live mandi prices...")
     app.state.live_prices = fetch_all_mandi_prices()
     print(f"Live prices loaded: {app.state.live_prices}")

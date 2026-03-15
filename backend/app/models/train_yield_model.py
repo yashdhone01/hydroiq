@@ -1,106 +1,71 @@
-import os
-import joblib
-import numpy as np
-import json
 import pandas as pd
+import numpy as np
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import mean_absolute_error, r2_score
+import joblib
+import os
 
-MODEL_DIR = os.path.join(os.path.dirname(__file__), 'saved')
-DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'crops.json')
+def train_yield_model():
+    np.random.seed(42)
 
-def load_model():
-    model     = joblib.load(os.path.join(MODEL_DIR, 'yield_model.pkl'))
-    le_crop   = joblib.load(os.path.join(MODEL_DIR, 'le_crop.pkl'))
-    le_system = joblib.load(os.path.join(MODEL_DIR, 'le_system.pkl'))
-    le_exp    = joblib.load(os.path.join(MODEL_DIR, 'le_exp.pkl'))
-    return model, le_crop, le_system, le_exp
+    systems     = ['NFT', 'DWC', 'Kratky']
+    crops       = ['basil', 'mint', 'lettuce', 'spinach', 'kale',
+                   'cherry_tomato', 'cucumber', 'strawberry']
+    experiences = ['beginner', 'intermediate', 'expert']
 
-def load_crops() -> pd.DataFrame:
-    with open(DATA_PATH, 'r') as f:
-        data = json.load(f)
-    return pd.DataFrame(data['crops'])
-
-def estimate_yield(
-    crop_id:          str,
-    system_type:      str,
-    area_sqft:        float,
-    experience_level: str = 'beginner'
-) -> dict:
-    try:
-        model, le_crop, le_system, le_exp = load_model()
-    except Exception:
-        return {'error': 'Model not found. Run train_yield_model.py first.'}
-
-    df   = load_crops()
-    crop = df[df['id'] == crop_id]
-    if crop.empty:
-        return {'error': f'Crop {crop_id} not found'}
-    crop = crop.iloc[0]
-
-    try:
-        crop_enc   = le_crop.transform([crop_id])[0]
-        system_enc = le_system.transform([system_type])[0]
-        exp_enc    = le_exp.transform([experience_level])[0]
-    except ValueError as e:
-        return {'error': f'Invalid input: {str(e)}'}
-
-    X = np.array([[crop_enc, system_enc, float(area_sqft), exp_enc]])
-    yield_per_sqft  = float(model.predict(X)[0])
-    yield_per_cycle = round(yield_per_sqft * area_sqft, 2)
-    annual_yield    = round(yield_per_cycle * int(crop['cycles_per_year']), 2)
-
-    return {
-        'crop_name':            str(crop['name']),
-        'system_type':          system_type,
-        'area_sqft':            float(area_sqft),
-        'experience_level':     experience_level,
-        'yield_per_sqft':       round(yield_per_sqft, 4),
-        'yield_per_cycle_kg':   yield_per_cycle,
-        'cycles_per_year':      int(crop['cycles_per_year']),
-        'annual_yield_kg':      annual_yield,
-        'growth_days':          int(crop['growth_days']),
-        'model':                'GradientBoostingRegressor',
-        'r2_score':             0.9644
+    base_yields = {
+        ('basil','NFT'):0.45,('basil','DWC'):0.52,('basil','Kratky'):0.38,
+        ('mint','NFT'):0.40,('mint','DWC'):0.46,('mint','Kratky'):0.34,
+        ('lettuce','NFT'):0.60,('lettuce','DWC'):0.69,('lettuce','Kratky'):0.45,
+        ('spinach','NFT'):0.50,('spinach','DWC'):0.57,('spinach','Kratky'):0.42,
+        ('kale','NFT'):0.55,('kale','DWC'):0.63,('kale','Kratky'):0.46,
+        ('cherry_tomato','NFT'):1.20,('cherry_tomato','DWC'):1.38,('cherry_tomato','Kratky'):0.90,
+        ('cucumber','NFT'):1.50,('cucumber','DWC'):1.72,('cucumber','Kratky'):1.20,
+        ('strawberry','NFT'):0.80,('strawberry','DWC'):0.92,('strawberry','Kratky'):0.65,
     }
+    exp_mult = {'beginner':0.70,'intermediate':0.90,'expert':1.00}
 
-def calculate_roi(
-    crop_id:                str,
-    system_type:            str,
-    area_sqft:              float,
-    target_market:          str,
-    setup_cost:             float,
-    monthly_operating_cost: float,
-    experience_level:       str = 'beginner'
-) -> dict:
-    df   = load_crops()
-    crop = df[df['id'] == crop_id]
-    if crop.empty:
-        return {'error': f'Crop {crop_id} not found'}
-    crop = crop.iloc[0]
+    records = []
+    for _ in range(2000):
+        crop   = np.random.choice(crops)
+        system = np.random.choice(systems)
+        area   = np.random.uniform(50, 2000)
+        exp    = np.random.choice(experiences)
+        base   = base_yields.get((crop, system), 0.5)
+        noise  = np.random.normal(1.0, 0.08)
+        records.append({
+            'crop': crop, 'system': system,
+            'area_sqft': area, 'experience': exp,
+            'yield_per_sqft': base * exp_mult[exp] * noise
+        })
 
-    yield_data = estimate_yield(crop_id, system_type, area_sqft, experience_level)
-    if 'error' in yield_data:
-        return yield_data
+    df = pd.DataFrame(records)
+    le_crop   = LabelEncoder()
+    le_system = LabelEncoder()
+    le_exp    = LabelEncoder()
+    df['crop_enc']   = le_crop.fit_transform(df['crop'])
+    df['system_enc'] = le_system.fit_transform(df['system'])
+    df['exp_enc']    = le_exp.fit_transform(df['experience'])
 
-    price = float(crop['export_price_per_kg']) if target_market == 'export' \
-            else float(crop['local_price_per_kg'])
+    X = df[['crop_enc','system_enc','area_sqft','exp_enc']]
+    y = df['yield_per_sqft']
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    annual_revenue       = round(yield_data['annual_yield_kg'] * price, 2)
-    annual_operating     = round(monthly_operating_cost * 12, 2)
-    annual_profit        = round(annual_revenue - annual_operating, 2)
-    breakeven_months     = round(setup_cost / (annual_profit / 12), 1) \
-                           if annual_profit > 0 else None
+    model = GradientBoostingRegressor(n_estimators=200, max_depth=4, random_state=42)
+    model.fit(X_train, y_train)
 
-    return {
-        'crop_name':             str(crop['name']),
-        'annual_revenue':        annual_revenue,
-        'annual_operating_cost': annual_operating,
-        'annual_profit':         annual_profit,
-        'setup_cost':            float(setup_cost),
-        'breakeven_months':      breakeven_months if breakeven_months else 'N/A',
-        'roi_percentage':        round((annual_profit / setup_cost) * 100, 1) \
-                                 if setup_cost > 0 else 0,
-        'price_per_kg':          int(price),
-        'target_market':         target_market,
-        'model':                 'GradientBoostingRegressor',
-        'r2_score':              0.9644
-    }
+    print(f"MAE : {mean_absolute_error(y_test, model.predict(X_test)):.4f}")
+    print(f"R²  : {r2_score(y_test, model.predict(X_test)):.4f}")
+
+    os.makedirs(os.path.join(os.path.dirname(__file__), 'saved'), exist_ok=True)
+    save_dir = os.path.join(os.path.dirname(__file__), 'saved')
+    joblib.dump(model,    os.path.join(save_dir, 'yield_model.pkl'))
+    joblib.dump(le_crop,  os.path.join(save_dir, 'le_crop.pkl'))
+    joblib.dump(le_system,os.path.join(save_dir, 'le_system.pkl'))
+    joblib.dump(le_exp,   os.path.join(save_dir, 'le_exp.pkl'))
+    print("Model saved!")
+
+if __name__ == '__main__':
+    train_yield_model()
