@@ -30,7 +30,7 @@ async def startup_event():
 
     print("Fetching live mandi prices...")
     app.state.live_prices = fetch_all_mandi_prices()
-    print(f"Live prices loaded: {app.state.live_prices}")
+    print(f"Live prices loaded: {app.state.live_prices}")   
 
 app.include_router(crops.router)
 app.include_router(export.router)
