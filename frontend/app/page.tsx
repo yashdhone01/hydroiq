@@ -41,15 +41,36 @@ export default function Home() {
       setResults(rec.data.recommendations)
       if (rec.data.recommendations.length > 0) {
         const topCrop = rec.data.recommendations[0].id
-        setRoiForm(f => ({ ...f, crop_id: topCrop }))
+        const expLevel = roiForm.experience_level  // capture before state update
+
         const [yld, roiRes] = await Promise.all([
-          axios.get(`${API}/crops/yield`, { params: { crop_id: topCrop, system_type: form.system_type, area_sqft: form.area_sqft, experience_level: roiForm.experience_level } }),
-          axios.get(`${API}/roi/calculate`, { params: { crop_id: topCrop, system_type: form.system_type, area_sqft: form.area_sqft, target_market: form.target_market, setup_cost: roiForm.setup_cost, monthly_operating_cost: roiForm.monthly_operating_cost, experience_level: roiForm.experience_level } })
+          axios.get(`${API}/crops/yield`, {
+            params: {
+              crop_id: topCrop,
+              system_type: form.system_type,
+              area_sqft: form.area_sqft,
+              experience_level: expLevel
+            }
+          }),
+          axios.get(`${API}/roi/calculate`, {
+            params: {
+              crop_id: topCrop,
+              system_type: form.system_type,
+              area_sqft: form.area_sqft,
+              target_market: form.target_market,
+              setup_cost: roiForm.setup_cost,
+              monthly_operating_cost: roiForm.monthly_operating_cost,
+              experience_level: expLevel
+            }
+          })
         ])
+        setRoiForm(f => ({ ...f, crop_id: topCrop }))
         setYieldData(yld.data)
         setRoi(roiRes.data)
       }
       setSubmitted(true)
+    } catch(e) {
+      console.error(e)
     } finally {
       setLoading(false)
     }
