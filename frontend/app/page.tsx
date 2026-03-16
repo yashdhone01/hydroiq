@@ -5,33 +5,34 @@ import axios from 'axios'
 const API = 'https://hydroiq.onrender.com'
 
 const UNSPLASH = {
-  hero:        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80',
-  hydro1:      'https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?w=800&q=80',
-  hydro2:      'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=800&q=80',
-  export:      'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80',
+  hero: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80',
+  hydro1: 'https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?w=800&q=80',
+  hydro2: 'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=800&q=80',
+  export: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80',
 }
 
 const BENEFITS = [
-  { icon: '💧', title: '90% Less Water',      desc: 'Hydroponics uses up to 90% less water than traditional soil farming through recirculation systems.' },
-  { icon: '📈', title: '3-5x Higher Yield',   desc: 'Controlled environment and optimized nutrients deliver significantly higher yields per square foot.' },
-  { icon: '🌍', title: 'Grow Anywhere',       desc: 'No soil needed. Grow fresh produce in urban spaces, rooftops, warehouses, or any indoor setting.' },
-  { icon: '🚫', title: 'No Pesticides',       desc: 'Controlled environments eliminate most pests, reducing or eliminating the need for harmful chemicals.' },
-  { icon: '📅', title: 'Year-Round Growing',  desc: 'Independent of seasons and weather — grow any crop any time of year.' },
-  { icon: '💰', title: 'Export Premium',      desc: 'Pesticide-free hydroponic produce commands 3-8x higher prices in UAE, EU, and UK export markets.' },
+  { icon: '💧', title: '90% Less Water', desc: 'Hydroponics uses up to 90% less water than traditional soil farming through recirculation systems.' },
+  { icon: '📈', title: '3-5x Higher Yield', desc: 'Controlled environment and optimized nutrients deliver significantly higher yields per square foot.' },
+  { icon: '🌍', title: 'Grow Anywhere', desc: 'No soil needed. Grow fresh produce in urban spaces, rooftops, warehouses, or any indoor setting.' },
+  { icon: '🚫', title: 'No Pesticides', desc: 'Controlled environments eliminate most pests, reducing or eliminating the need for harmful chemicals.' },
+  { icon: '📅', title: 'Year-Round Growing', desc: 'Independent of seasons and weather — grow any crop any time of year.' },
+  { icon: '💰', title: 'Export Premium', desc: 'Pesticide-free hydroponic produce commands 3-8x higher prices in UAE, EU, and UK export markets.' },
 ]
 
 export default function Home() {
-  const [form, setForm]           = useState({ system_type: 'NFT', area_sqft: 500, target_market: 'export', budget: 50000 })
-  const [roiForm, setRoiForm]     = useState({ crop_id: 'basil', setup_cost: 50000, monthly_operating_cost: 5000, experience_level: 'beginner' })
-  const [results, setResults]     = useState<any[]>([])
+  const [form, setForm] = useState({ system_type: 'NFT', area_sqft: 500, target_market: 'export', budget: 50000 })
+  const [roiForm, setRoiForm] = useState({ crop_id: 'basil', setup_cost: 50000, monthly_operating_cost: 5000, experience_level: 'beginner' })
+  const [results, setResults] = useState<any[]>([])
   const [yieldData, setYieldData] = useState<any>(null)
-  const [prices, setPrices]       = useState<any>(null)
-  const [roi, setRoi]             = useState<any>(null)
-  const [loading, setLoading]     = useState(false)
+  const [prices, setPrices] = useState<any>(null)
+  const [roi, setRoi] = useState<any>(null)
+  const [forecast, setForecast] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
   useEffect(() => {
-    axios.get(`${API}/prices/live`).then(r => setPrices(r.data)).catch(() => {})
+    axios.get(`${API}/prices/live`).then(r => setPrices(r.data)).catch(() => { })
   }, [])
 
   const analyze = async () => {
@@ -67,9 +68,17 @@ export default function Home() {
         setRoiForm(f => ({ ...f, crop_id: topCrop }))
         setYieldData(yld.data)
         setRoi(roiRes.data)
+
+        // fetch price forecast for top crop
+        try {
+          const fc = await axios.get(`${API}/prices/predict`, {
+            params: { crop_id: topCrop, region: 'National', months_ahead: 3 }
+          })
+          setForecast(fc.data)
+        } catch { setForecast(null) }
       }
       setSubmitted(true)
-    } catch(e) {
+    } catch (e) {
       console.error(e)
     } finally {
       setLoading(false)
@@ -295,6 +304,39 @@ export default function Home() {
                       <div style={{ fontSize: '0.8rem', color: '#888', marginTop: '4px' }}>{l}</div>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* PRICE FORECAST */}
+            {forecast && (
+              <div style={{ background: 'linear-gradient(135deg, #1a1a2e, #16213e)', borderRadius: '16px', padding: '2rem', marginBottom: '2rem', color: '#fff' }}>
+                <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.6rem', fontWeight: 900, marginBottom: '1.5rem', color: '#7ddd6f' }}>📈 Price Forecast — {forecast.crop_id?.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                  {[
+                    ['Current Price', `₹${forecast.current_price}/kg`, '#94a3b8'],
+                    ['Predicted (3mo)', `₹${forecast.predicted_price}/kg`, '#7ddd6f'],
+                    ['Confidence Range', `₹${forecast.confidence_low} – ₹${forecast.confidence_high}`, '#60a5fa'],
+                    ['Direction', forecast.direction === 'rising' ? '↗ Rising' : forecast.direction === 'falling' ? '↘ Falling' : '→ Stable',
+                      forecast.direction === 'rising' ? '#4ade80' : forecast.direction === 'falling' ? '#f87171' : '#fbbf24'],
+                  ].map(([l, v, c]) => (
+                    <div key={l as string} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '1.2rem', textAlign: 'center', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 800, color: c as string }}>{v}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginTop: '4px' }}>{l}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <span style={{
+                      fontSize: '0.8rem', padding: '4px 12px', borderRadius: '20px', fontWeight: 600,
+                      background: forecast.seasonal_trend === 'high_season' ? 'rgba(74,222,128,0.15)' : forecast.seasonal_trend === 'low_season' ? 'rgba(248,113,113,0.15)' : 'rgba(251,191,36,0.15)',
+                      color: forecast.seasonal_trend === 'high_season' ? '#4ade80' : forecast.seasonal_trend === 'low_season' ? '#f87171' : '#fbbf24'
+                    }}>
+                      {forecast.seasonal_trend === 'high_season' ? '🔥 High Season' : forecast.seasonal_trend === 'low_season' ? '❄️ Low Season' : '📊 Stable Season'}
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)' }}>Model R² = {forecast.model_accuracy?.r2} · MAE = ₹{forecast.model_accuracy?.mae}/kg</span>
                 </div>
               </div>
             )}
