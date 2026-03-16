@@ -29,6 +29,19 @@ def recommend_crops(
 
     # convert to float and apply live mandi prices
     df['local_price_per_kg'] = df['local_price_per_kg'].astype(float)
+
+    # price priority: live > historical > static
+    # apply historical avg prices first (for crops without live prices)
+    try:
+        from app.services.data_pipeline import get_historical_avg_prices
+        historical = get_historical_avg_prices()
+        for crop_id, price in historical.items():
+            if crop_id not in live_prices:
+                df.loc[df['id'] == crop_id, 'local_price_per_kg'] = float(price)
+    except Exception:
+        historical = {}
+
+    # apply live prices (highest priority)
     for crop_id, price in live_prices.items():
         df.loc[df['id'] == crop_id, 'local_price_per_kg'] = float(price)
 
@@ -60,7 +73,7 @@ def recommend_crops(
             'water_per_cycle_liters': round(float(row['water_per_cycle_liters']), 2),
             'export_markets':         row['export_markets'],
             'roi_score':              round(float(row['roi_score']), 2),
-            'price_source':           'live' if row['id'] in live_prices else 'static'
+            'price_source':           'live' if row['id'] in live_prices else ('historical' if row['id'] in historical else 'static')
         })
 
     return result

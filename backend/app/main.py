@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import crops, export, roi
+from app.routes import crops, export, roi, prices
 from app.services.agmarknet_service import fetch_all_mandi_prices
 
 @asynccontextmanager
@@ -22,6 +22,16 @@ async def lifespan(app: FastAPI):
             train_yield_model()
         except Exception as e:
             print(f"⚠️  Model training failed: {e} — yield predictions may be unavailable")
+
+    # train price prediction model if not cached
+    price_model_path = os.path.join('app', 'models', 'saved', 'price_model.pkl')
+    if not os.path.exists(price_model_path):
+        try:
+            print("Training price prediction model...")
+            from app.models.train_price_model import train_price_model
+            train_price_model()
+        except Exception as e:
+            print(f"⚠️  Price model training failed: {e}")
 
     # fetch live prices
     print("Fetching live mandi prices...")
@@ -48,6 +58,7 @@ app.add_middleware(
 app.include_router(crops.router)
 app.include_router(export.router)
 app.include_router(roi.router)
+app.include_router(prices.router)
 
 @app.get("/")
 def root():
@@ -60,9 +71,12 @@ def root():
 
 @app.get("/health")
 def health():
+    import os
     return {
-        "status":      "running",
-        "live_prices": len(app.state.live_prices) > 0
+        "status":       "running",
+        "live_prices":  len(app.state.live_prices) > 0,
+        "yield_model":  os.path.exists(os.path.join('app', 'models', 'saved', 'yield_model.pkl')),
+        "price_model":  os.path.exists(os.path.join('app', 'models', 'saved', 'price_model.pkl')),
     }
 
 @app.get("/prices/live")
