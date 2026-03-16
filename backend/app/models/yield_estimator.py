@@ -65,7 +65,8 @@ def calculate_roi(
     target_market: str,
     setup_cost: float,
     monthly_operating_cost: float,
-    experience_level: str = 'beginner'
+    experience_level: str = 'beginner',
+    water_cost_per_liter: float = 0.0
 ) -> dict:
     df = load_crops()
     crop = df[df['id'] == crop_id]
@@ -78,19 +79,24 @@ def calculate_roi(
     yield_data  = estimate_yield(crop_id, system_type, area_sqft, experience_level)
     price       = crop['export_price_per_kg'] if target_market == 'export' else crop['local_price_per_kg']
 
+    # water cost: liters/sqft * area * cycles/year * cost/liter
+    annual_water_liters = crop['water_liters_per_sqft'] * area_sqft * crop['cycles_per_year']
+    annual_water_cost   = annual_water_liters * water_cost_per_liter
+
     annual_revenue          = yield_data['annual_yield_kg'] * price
-    annual_operating_cost   = monthly_operating_cost * 12
+    annual_operating_cost   = (monthly_operating_cost * 12) + annual_water_cost
     annual_profit           = annual_revenue - annual_operating_cost
     breakeven_months        = (setup_cost / (annual_profit / 12)) if annual_profit > 0 else None
 
     return {
-    'crop_name':                str(crop['name']),
-    'annual_revenue':           round(float(annual_revenue), 2),
-    'annual_operating_cost':    round(float(annual_operating_cost), 2),
-    'annual_profit':            round(float(annual_profit), 2),
-    'setup_cost':               round(float(setup_cost), 2),
-    'breakeven_months':         round(float(breakeven_months), 1) if breakeven_months else 'N/A',
-    'roi_percentage':           round(float((annual_profit / setup_cost) * 100), 1) if setup_cost > 0 else 0,
-    'price_per_kg':             int(price),
-    'target_market':            target_market
- }
+        'crop_name':                str(crop['name']),
+        'annual_revenue':           round(float(annual_revenue), 2),
+        'annual_operating_cost':    round(float(annual_operating_cost), 2),
+        'annual_water_cost':        round(float(annual_water_cost), 2),
+        'annual_profit':            round(float(annual_profit), 2),
+        'setup_cost':               round(float(setup_cost), 2),
+        'breakeven_months':         round(float(breakeven_months), 1) if breakeven_months else 'N/A',
+        'roi_percentage':           round(float((annual_profit / setup_cost) * 100), 1) if setup_cost > 0 else 0,
+        'price_per_kg':             int(price),
+        'target_market':            target_market
+    }
