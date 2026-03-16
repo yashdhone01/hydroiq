@@ -1,26 +1,12 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import crops, export, roi
 from app.services.agmarknet_service import fetch_all_mandi_prices
 
-app = FastAPI(
-    title="HydroIQ API",
-    description="Crop intelligence platform for hydroponic growers",
-    version="2.0.0"
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# live price cache — updated on startup
-app.state.live_prices = {}
-
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # — startup —
     import os
     model_path = os.path.join('app', 'models', 'saved', 'yield_model.pkl')
     if not os.path.exists(model_path):
@@ -30,7 +16,24 @@ async def startup_event():
 
     print("Fetching live mandi prices...")
     app.state.live_prices = fetch_all_mandi_prices()
-    print(f"Live prices loaded: {app.state.live_prices}")   
+    print(f"Live prices loaded: {app.state.live_prices}")
+
+    yield
+    # — shutdown (nothing to clean up) —
+
+app = FastAPI(
+    title="HydroIQ API",
+    description="Crop intelligence platform for hydroponic growers",
+    version="2.0.0",
+    lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(crops.router)
 app.include_router(export.router)
