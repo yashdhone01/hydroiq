@@ -27,7 +27,7 @@ def estimate_yield(
     crop = df[df['id'] == crop_id]
 
     if crop.empty:
-        return {'error': f'Crop {crop_id} not found'}
+        raise ValueError(f'Crop {crop_id} not found')
 
     crop = crop.iloc[0]
 
@@ -71,7 +71,7 @@ def calculate_roi(
     crop = df[df['id'] == crop_id]
 
     if crop.empty:
-        return {'error': f'Crop {crop_id} not found'}
+        raise ValueError(f'Crop {crop_id} not found')
 
     crop = crop.iloc[0]
 

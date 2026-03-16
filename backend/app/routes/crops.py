@@ -1,17 +1,22 @@
-from fastapi import APIRouter, Query, Request
+from typing import Literal
+from fastapi import APIRouter, HTTPException, Query, Request
 from app.models.recommender import recommend_crops
 from app.models.yield_estimator import estimate_yield
 
 router = APIRouter(prefix="/crops", tags=["crops"])
 
+SystemType      = Literal['NFT', 'DWC', 'Kratky']
+TargetMarket    = Literal['local', 'export']
+ExperienceLevel = Literal['beginner', 'intermediate', 'expert']
+
 @router.get("/recommend")
 def get_recommendations(
     request:       Request,
-    system_type:   str   = Query(...),
-    area_sqft:     float = Query(...),
-    target_market: str   = Query(...),
-    budget:        float = Query(50000),
-    top_n:         int   = Query(5)
+    system_type:   SystemType      = Query(...),
+    area_sqft:     float           = Query(..., gt=0),
+    target_market: TargetMarket    = Query(...),
+    budget:        float           = Query(50000, gt=0),
+    top_n:         int             = Query(5, ge=1, le=20)
 ):
     live_prices = getattr(request.app.state, 'live_prices', {})
     results = recommend_crops(
@@ -33,17 +38,20 @@ def get_recommendations(
 
 @router.get("/yield")
 def get_yield_estimate(
-    crop_id:          str   = Query(...),
-    system_type:      str   = Query(...),
-    area_sqft:        float = Query(...),
-    experience_level: str   = Query("beginner")
+    crop_id:          str             = Query(...),
+    system_type:      SystemType      = Query(...),
+    area_sqft:        float           = Query(..., gt=0),
+    experience_level: ExperienceLevel = Query("beginner")
 ):
-    return estimate_yield(
-        crop_id=crop_id,
-        system_type=system_type,
-        area_sqft=area_sqft,
-        experience_level=experience_level
-    )
+    try:
+        return estimate_yield(
+            crop_id=crop_id,
+            system_type=system_type,
+            area_sqft=area_sqft,
+            experience_level=experience_level
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 @router.get("/list")
 def list_crops():

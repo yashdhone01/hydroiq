@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 from app.models.recommender import load_crops
 
 router = APIRouter(prefix="/export", tags=["export"])
@@ -12,7 +12,7 @@ def get_export_intel(
     if crop_id:
         df = df[df['id'] == crop_id]
         if df.empty:
-            return {"error": f"Crop {crop_id} not found"}
+            raise HTTPException(status_code=404, detail=f"Crop {crop_id} not found")
 
     result = []
     for _, row in df.iterrows():
