@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 
 // Use local backend for development (switch to render for production)
-const API = 'http://localhost:8000'
+const API = 'https://hydroiq.onrender.com'
 
 const UNSPLASH = {
   hero: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80',
@@ -276,14 +276,14 @@ export default function Home() {
               {results.map((crop, i) => {
                 const isSelected = roiForm.crop_id === crop.id
                 return (
-                  <div key={i} 
+                  <div key={i}
                     onClick={() => selectCrop(crop.id)}
-                    style={{ 
-                      background: '#fff', 
-                      borderRadius: '16px', 
-                      padding: '1.8rem', 
-                      border: isSelected ? '2px solid #4caf50' : '1px solid #eee', 
-                      position: 'relative', 
+                    style={{
+                      background: '#fff',
+                      borderRadius: '16px',
+                      padding: '1.8rem',
+                      border: isSelected ? '2px solid #4caf50' : '1px solid #eee',
+                      position: 'relative',
                       boxShadow: isSelected ? '0 8px 30px rgba(76,175,80,0.15)' : '0 2px 10px rgba(0,0,0,0.04)',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease-in-out',
@@ -291,33 +291,34 @@ export default function Home() {
                     }}>
                     {i === 0 && <div style={{ position: 'absolute', top: '-12px', left: '20px', background: '#4caf50', color: '#fff', fontSize: '0.75rem', fontWeight: 700, padding: '3px 12px', borderRadius: '20px' }}>TOP PICK</div>}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                    <h4 style={{ fontWeight: 700, fontSize: '1.2rem' }}>{crop.name}</h4>
-                    <span style={{ fontSize: '0.75rem', padding: '3px 10px', borderRadius: '20px', fontWeight: 600, background: crop.difficulty === 'Easy' ? '#e8f5e9' : crop.difficulty === 'Medium' ? '#fff8e1' : '#fce4ec', color: crop.difficulty === 'Easy' ? '#2e7d32' : crop.difficulty === 'Medium' ? '#f57f17' : '#c62828' }}>
-                      {crop.difficulty}
-                    </span>
+                      <h4 style={{ fontWeight: 700, fontSize: '1.2rem' }}>{crop.name}</h4>
+                      <span style={{ fontSize: '0.75rem', padding: '3px 10px', borderRadius: '20px', fontWeight: 600, background: crop.difficulty === 'Easy' ? '#e8f5e9' : crop.difficulty === 'Medium' ? '#fff8e1' : '#fce4ec', color: crop.difficulty === 'Easy' ? '#2e7d32' : crop.difficulty === 'Medium' ? '#f57f17' : '#c62828' }}>
+                        {crop.difficulty}
+                      </span>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', fontSize: '0.85rem' }}>
+                      {[
+                        ['Annual Revenue', `₹${crop.annual_revenue.toLocaleString()}`],
+                        ['Per Cycle', `₹${crop.revenue_per_cycle.toLocaleString()}`],
+                        ['Cycles/Year', crop.cycles_per_year],
+                        ['Growth Days', `${crop.growth_days}d`],
+                        ['Price/kg', `₹${crop.price_per_kg}`],
+                        ['Source', crop.price_source],
+                      ].map(([l, v]) => (
+                        <div key={l}>
+                          <div style={{ color: '#999', fontSize: '0.75rem' }}>{l}</div>
+                          <div style={{ fontWeight: 600, color: l === 'Source' && v === 'live' ? '#4caf50' : '#1a1a1a' }}>{v}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ marginTop: '1rem', display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                      {crop.export_markets.map((m: string) => (
+                        <span key={m} style={{ fontSize: '0.72rem', background: '#e3f2fd', color: '#1565c0', padding: '2px 8px', borderRadius: '12px' }}>{m}</span>
+                      ))}
+                    </div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', fontSize: '0.85rem' }}>
-                    {[
-                      ['Annual Revenue', `₹${crop.annual_revenue.toLocaleString()}`],
-                      ['Per Cycle', `₹${crop.revenue_per_cycle.toLocaleString()}`],
-                      ['Cycles/Year', crop.cycles_per_year],
-                      ['Growth Days', `${crop.growth_days}d`],
-                      ['Price/kg', `₹${crop.price_per_kg}`],
-                      ['Source', crop.price_source],
-                    ].map(([l, v]) => (
-                      <div key={l}>
-                        <div style={{ color: '#999', fontSize: '0.75rem' }}>{l}</div>
-                        <div style={{ fontWeight: 600, color: l === 'Source' && v === 'live' ? '#4caf50' : '#1a1a1a' }}>{v}</div>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{ marginTop: '1rem', display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                    {crop.export_markets.map((m: string) => (
-                      <span key={m} style={{ fontSize: '0.72rem', background: '#e3f2fd', color: '#1565c0', padding: '2px 8px', borderRadius: '12px' }}>{m}</span>
-                    ))}
-                  </div>
-                </div>
-              )})}
+                )
+              })}
             </div>
 
             {/* YIELD */}
