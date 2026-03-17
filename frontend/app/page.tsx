@@ -180,6 +180,23 @@ export default function Home() {
         </div>
       </section>
 
+      {/* DID YOU KNOW FACTS */}
+      <section style={{ padding: '6rem 4rem', background: '#eef2f5' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <p style={{ color: '#4caf50', fontWeight: 600, fontSize: '0.85rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1rem', textAlign: 'center' }}>Verified Facts</p>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '2.5rem', fontWeight: 900, textAlign: 'center', marginBottom: '3rem' }}>Did You Know?</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+            {DID_YOU_KNOW.map((item, i) => (
+              <div key={i} style={{ background: '#fff', borderRadius: '16px', padding: '1.5rem', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid #eee' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>{item.emoji}</div>
+                <p style={{ color: '#444', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '1rem' }}>{item.fact}</p>
+                <p style={{ color: '#888', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Source: {item.source}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ANALYZE FORM */}
       <section id="analyze" style={{ padding: '6rem 4rem', maxWidth: '1200px', margin: '0 auto' }}>
         <p style={{ color: '#4caf50', fontWeight: 600, fontSize: '0.85rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1rem' }}>AI Analysis</p>
