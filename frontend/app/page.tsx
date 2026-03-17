@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
-const API = 'https://hydroiq.onrender.com'
+// Use local backend for development (switch to render for production)
+const API = 'http://localhost:8000'
 
 const UNSPLASH = {
   hero: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80',
@@ -52,43 +53,53 @@ export default function Home() {
       const rec = await axios.get(`${API}/crops/recommend`, { params: { ...form, top_n: 5 } })
       setResults(rec.data.recommendations)
       if (rec.data.recommendations.length > 0) {
-        const topCrop = rec.data.recommendations[0].id
-        const expLevel = roiForm.experience_level  // capture before state update
-
-        const [yld, roiRes] = await Promise.all([
-          axios.get(`${API}/crops/yield`, {
-            params: {
-              crop_id: topCrop,
-              system_type: form.system_type,
-              area_sqft: form.area_sqft,
-              experience_level: expLevel
-            }
-          }),
-          axios.get(`${API}/roi/calculate`, {
-            params: {
-              crop_id: topCrop,
-              system_type: form.system_type,
-              area_sqft: form.area_sqft,
-              target_market: form.target_market,
-              setup_cost: roiForm.setup_cost,
-              monthly_operating_cost: roiForm.monthly_operating_cost,
-              experience_level: expLevel
-            }
-          })
-        ])
-        setRoiForm(f => ({ ...f, crop_id: topCrop }))
-        setYieldData(yld.data)
-        setRoi(roiRes.data)
-
-        // fetch price forecast for top crop
-        try {
-          const fc = await axios.get(`${API}/prices/predict`, {
-            params: { crop_id: topCrop, region: 'National', months_ahead: 3 }
-          })
-          setForecast(fc.data)
-        } catch { setForecast(null) }
+        await selectCrop(rec.data.recommendations[0].id)
       }
       setSubmitted(true)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const selectCrop = async (cropId: string) => {
+    setLoading(true)
+    try {
+      const expLevel = roiForm.experience_level // capture before state update
+
+      const [yld, roiRes] = await Promise.all([
+        axios.get(`${API}/crops/yield`, {
+          params: {
+            crop_id: cropId,
+            system_type: form.system_type,
+            area_sqft: form.area_sqft,
+            experience_level: expLevel
+          }
+        }),
+        axios.get(`${API}/roi/calculate`, {
+          params: {
+            crop_id: cropId,
+            system_type: form.system_type,
+            area_sqft: form.area_sqft,
+            target_market: form.target_market,
+            setup_cost: roiForm.setup_cost,
+            monthly_operating_cost: roiForm.monthly_operating_cost,
+            experience_level: expLevel
+          }
+        })
+      ])
+      setRoiForm(f => ({ ...f, crop_id: cropId }))
+      setYieldData(yld.data)
+      setRoi(roiRes.data)
+
+      // fetch price forecast for selected crop
+      try {
+        const fc = await axios.get(`${API}/prices/predict`, {
+          params: { crop_id: cropId, region: 'National', months_ahead: 3 }
+        })
+        setForecast(fc.data)
+      } catch { setForecast(null) }
     } catch (e) {
       console.error(e)
     } finally {
@@ -262,10 +273,24 @@ export default function Home() {
               🌱 Crop Recommendations
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
-              {results.map((crop, i) => (
-                <div key={i} style={{ background: '#fff', borderRadius: '16px', padding: '1.8rem', border: i === 0 ? '2px solid #4caf50' : '1px solid #eee', position: 'relative', boxShadow: i === 0 ? '0 8px 30px rgba(76,175,80,0.15)' : '0 2px 10px rgba(0,0,0,0.04)' }}>
-                  {i === 0 && <div style={{ position: 'absolute', top: '-12px', left: '20px', background: '#4caf50', color: '#fff', fontSize: '0.75rem', fontWeight: 700, padding: '3px 12px', borderRadius: '20px' }}>TOP PICK</div>}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+              {results.map((crop, i) => {
+                const isSelected = roiForm.crop_id === crop.id
+                return (
+                  <div key={i} 
+                    onClick={() => selectCrop(crop.id)}
+                    style={{ 
+                      background: '#fff', 
+                      borderRadius: '16px', 
+                      padding: '1.8rem', 
+                      border: isSelected ? '2px solid #4caf50' : '1px solid #eee', 
+                      position: 'relative', 
+                      boxShadow: isSelected ? '0 8px 30px rgba(76,175,80,0.15)' : '0 2px 10px rgba(0,0,0,0.04)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease-in-out',
+                      transform: isSelected ? 'translateY(-4px)' : 'none'
+                    }}>
+                    {i === 0 && <div style={{ position: 'absolute', top: '-12px', left: '20px', background: '#4caf50', color: '#fff', fontSize: '0.75rem', fontWeight: 700, padding: '3px 12px', borderRadius: '20px' }}>TOP PICK</div>}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                     <h4 style={{ fontWeight: 700, fontSize: '1.2rem' }}>{crop.name}</h4>
                     <span style={{ fontSize: '0.75rem', padding: '3px 10px', borderRadius: '20px', fontWeight: 600, background: crop.difficulty === 'Easy' ? '#e8f5e9' : crop.difficulty === 'Medium' ? '#fff8e1' : '#fce4ec', color: crop.difficulty === 'Easy' ? '#2e7d32' : crop.difficulty === 'Medium' ? '#f57f17' : '#c62828' }}>
                       {crop.difficulty}
@@ -292,7 +317,7 @@ export default function Home() {
                     ))}
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
 
             {/* YIELD */}
