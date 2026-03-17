@@ -12,17 +12,28 @@ const UNSPLASH = {
 }
 
 const BENEFITS = [
-  { icon: '💧', title: '90% Less Water', desc: 'Hydroponics uses up to 90% less water than traditional soil farming through recirculation systems.' },
-  { icon: '📈', title: '3-5x Higher Yield', desc: 'Controlled environment and optimized nutrients deliver significantly higher yields per square foot.' },
-  { icon: '🌍', title: 'Grow Anywhere', desc: 'No soil needed. Grow fresh produce in urban spaces, rooftops, warehouses, or any indoor setting.' },
-  { icon: '🚫', title: 'No Pesticides', desc: 'Controlled environments eliminate most pests, reducing or eliminating the need for harmful chemicals.' },
-  { icon: '📅', title: 'Year-Round Growing', desc: 'Independent of seasons and weather — grow any crop any time of year.' },
-  { icon: '💰', title: 'Export Premium', desc: 'Pesticide-free hydroponic produce commands 3-8x higher prices in UAE, EU, and UK export markets.' },
+  { icon: '💧', title: 'Up to 90% Less Water', desc: 'Published in Nature Sustainability: hydroponic systems reduce water use by 70–90% vs soil farming through closed-loop recirculation — no runoff, no evaporation loss.' },
+  { icon: '📈', title: '25–50% Faster Growth', desc: 'Research in Horticultural Science confirmed hydroponic lettuce matured 25% faster than soil-grown. Direct root-nutrient delivery eliminates energy spent searching for food.' },
+  { icon: '🌍', title: 'Grow Anywhere', desc: 'No soil needed. Produce fresh crops in urban spaces, rooftops, warehouses, or any indoor setting — regardless of climate or season.' },
+  { icon: '🚫', title: 'No Pesticides Needed', desc: 'A controlled, soil-free environment eliminates most soil-borne pests and diseases — reducing or completely removing the need for chemical pesticides.' },
+  { icon: '📅', title: 'Year-Round Harvest', desc: 'Decouple from seasons and monsoons. Hydroponic basil yields 10–12 cycles per year vs 2–3 in traditional farming, multiplying your annual income.' },
+  { icon: '💰', title: 'Export Premium Prices', desc: 'Pesticide-free, traceable hydroponic produce commands 3–8x higher prices in UAE, EU, and UK markets. Indian exporters have seen ₹400–900/kg for premium basil and mint.' },
+]
+
+const DID_YOU_KNOW = [
+  { emoji: '🍅', fact: 'Hydroponic tomatoes in DWC systems have been found to have higher levels of lycopene and β-carotene than soil-grown tomatoes.', source: 'NIH / NCBI research study' },
+  { emoji: '🥬', fact: 'Hydroponic spinach showed elevated concentrations of protein, calcium, and iron compared to soil-grown spinach in controlled studies.', source: 'Journal of Agricultural Science' },
+  { emoji: '💧', fact: 'A single lettuce plant grown hydroponically uses as little as 13 litres of water vs up to 130 litres in conventional farming.', source: 'FAO water efficiency study' },
+  { emoji: '🚀', fact: 'NASA has researched hydroponics since the 1960s as the primary food production method for long-duration space missions.', source: 'NASA Technical Reports' },
+  { emoji: '🌿', fact: 'Hydroponic basil can be harvested every 3–4 weeks vs every 8–10 weeks in soil — giving 10+ harvest cycles per year in a controlled environment.', source: 'CEA industry benchmark' },
+  { emoji: '🇮🇳', fact: "India's hydroponic market is growing at ~13% annually, driven by urban farming, premium restaurants, and export demand for pesticide-free produce.", source: 'MarketsandMarkets 2023 report' },
+  { emoji: '📦', fact: 'Hydroponic produce stays fresh up to 30% longer post-harvest because plants are harvested at peak nutrition with minimal stress.', source: 'Post-harvest quality research' },
+  { emoji: '🌡️', fact: 'Maintaining nutrient solution at 18–22°C is the single biggest lever for maximising yield in NFT and DWC systems.', source: 'Horticultural Science field study' },
 ]
 
 export default function Home() {
-  const [form, setForm] = useState({ system_type: 'NFT', area_sqft: 500, target_market: 'export', budget: 50000 })
-  const [roiForm, setRoiForm] = useState({ crop_id: 'basil', setup_cost: 50000, monthly_operating_cost: 5000, experience_level: 'beginner' })
+  const [form, setForm] = useState({ system_type: 'NFT', area_sqft: 200, target_market: 'export', budget: 500000 })
+  const [roiForm, setRoiForm] = useState({ crop_id: 'basil', setup_cost: 500000, monthly_operating_cost: 15000, experience_level: 'beginner' })
   const [results, setResults] = useState<any[]>([])
   const [yieldData, setYieldData] = useState<any>(null)
   const [prices, setPrices] = useState<any>(null)
@@ -126,10 +137,10 @@ export default function Home() {
             <p style={{ color: '#4caf50', fontWeight: 600, fontSize: '0.85rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1rem' }}>What is Hydroponics?</p>
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '2.8rem', fontWeight: 900, lineHeight: 1.2, marginBottom: '1.5rem' }}>Farming without soil.<br />Results beyond belief.</h2>
             <p style={{ color: '#555', lineHeight: 1.9, fontSize: '1rem', marginBottom: '1rem' }}>
-              Hydroponics is a method of growing plants using mineral nutrient solutions in water, without soil. Plants receive nutrients directly through their roots in a controlled environment — resulting in faster growth, higher yields, and year-round production.
+              Hydroponics is a method of growing plants using mineral nutrient solutions in water, without soil. Plants receive nutrients directly to their roots in a controlled environment — resulting in growth rates <strong>25–50% faster</strong> than soil, higher nutritional density, and year-round harvests regardless of season or climate.
             </p>
             <p style={{ color: '#555', lineHeight: 1.9, fontSize: '1rem' }}>
-              India's hydroponic market is growing at 13% annually, driven by urban farming demand and premium export opportunities to UAE, EU, and UK markets where pesticide-free produce commands 3-8x higher prices.
+              India's hydroponic market is growing at <strong>~13% annually</strong>, driven by urban farming demand and premium export opportunities to UAE, EU, and UK markets — where certified pesticide-free produce commands <strong>3–8x higher prices</strong> than conventionally grown alternatives.
             </p>
           </div>
           <div style={{ position: 'relative' }}>
